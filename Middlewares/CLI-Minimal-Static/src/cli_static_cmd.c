@@ -9,7 +9,7 @@
  * Structure { "command", "help string", command_function, number_of_args }
  */
 cli_command_definition_t cli_command_table[] = {
-		{ "landingon", "Landing lights. Usage: 0->OFF,1->ON\r\n", cli_landingon_command, 0},
+		{ "landingon", "Landing lights. Usage: 0->OFF,1->ON\r\n", cli_landingon_command, 1},
 		{ "landingoff", "Landing lights. Usage: 0->OFF,1->ON\r\n", cli_landingoff_command, 0},
 		{ "strobeon", "Strobe lights. Usage: 0->OFF,1->ON\r\n", cli_strobeon_command, 0},
 		{ "strobeoff", "Strobe lights. Usage: 0->OFF,1->ON\r\n", cli_strobeoff_command, 0},

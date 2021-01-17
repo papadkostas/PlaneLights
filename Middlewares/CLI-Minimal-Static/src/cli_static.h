@@ -34,7 +34,7 @@
 ////////////////////////////////////////////////////
 // application specific
 #include <stdio.h>
-#define CLI_PRINTF	CDCprintf
+#define CLI_PRINTF		printf
 ////////////////////////////////////////////////////
 
 #ifndef CLI_PRINTF
@@ -46,7 +46,7 @@ typedef void (*command_line_callback_f)(char *command_str);
 
 // command structure
 typedef struct {
-	// The command that causes the command interpreter to be executed.
+	// The command that causes the command interperter to be executed.
 	// For example "help".  Must be all lower case.
 	const char *command_str;
 	// String that describes how to use the command.  Should start with
@@ -60,15 +60,15 @@ typedef struct {
 } cli_command_definition_t;
 
 /**
- * @brief Process incoming serial data string
+ * @brief Process incomming serial data string
  *
- * This function processes a serial data string which is
+ * This funciton processes a serial data string which is
  * given as a parameter. The string should not contain odd
  * characters like new lines and carriage return characters.
  * the function will search through all known commands which are 
  * found inside the cli_static_cmd.c file. If the command is found,
- * it is executed. If errors occur during the parsing of the command
- * or the number of parameters is incorrect, a error message will
+ * it is executed. If errors occure during the parsing of the command
+ * or the number of parameters is incorrect, a error messege will
  * be written using CLI_PUTS().
  * 
  * @param received_command_str The string to process
@@ -82,16 +82,36 @@ extern int cli_process_command(char *received_command_str);
  *
  * This function will search through the given string for
  * the specified parameter. The parameters should be split
- * using spaces and may not contain spaces themselves.
- * a char pointer to the start of the parameter is returned.
+ * using spaces. A paramter may contian spaces itself, but these
+ * parameters should be placed between apostrophes. A char 
+ * pointer to the start of the parameter is returned.
  * 
  * @param command_string The string to search through
  * @param wanted_parameter The integer number of the wanted parameter
- * @param parameter_str_len A pointer which will contain the
+ * @param parameter_str_len A pointer which will contian the 
  * parameter length when returned
  * 
  * @return OK (valid pointer) or Error (NULL pointer)
  */
 extern char *cli_get_parameter(char *command_string, int wanted_parameter, int *parameter_str_len);
+
+/**
+ * @brief Get the specified parameter from a string and place it in the given buffer
+ *
+ * This function will search through the given string for
+ * the specified parameter. The parameters should be split
+ * using spaces. A paramter may contian spaces itself, but these
+ * parameters should be placed between apostrophes. The found
+ * parameter is then copied into the given buffer. If the
+ * parameter is longer than the buffer, an error is returned.
+ * 
+ * @param command_string The string to search through
+ * @param wanted_parameter The integer number of the wanted parameter
+ * @param parameter_str_len A pointer which will contian the 
+ * parameter length when returned
+ * 
+ * @return OK (0) or Error (-1)
+ */
+extern int cli_get_parameter_buf(char *command_string, int wanted_parameter, char *buf, int buf_len);
 
 #endif // CLI_STATIC_H_

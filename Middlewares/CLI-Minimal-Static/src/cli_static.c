@@ -77,7 +77,7 @@ int cli_process_command(char *received_command_str) {
 	// check the result
 	if ((ptr->command_str != NULL) && (ret == -1)) {
 		// The command was found, but the number of parameters with the command was incorrect.
-		CLI_PRINTF("Incorrect command parameter(s).  Enter 'help' to view a list of available commands.\r\n\0");
+		CLI_PRINTF("Incorrect command parameter(s).  Enter 'help' to view a list of available commands.\r\n");
 		// return error
 		ret = -1;
 	}
@@ -98,52 +98,161 @@ int cli_process_command(char *received_command_str) {
 	return ret;
 }
 
+// Search for the next parameter. This is done by searching for
+// the next space. However, there should also be acounted for
+// apostrophes inside the string which surround long parameters.
+static char *cli_find_next_parameter(char *start) {
+	uint8_t long_parameter = 0;
+	
+	// check if the data before this is an apostrophe
+	start--;
+	if (*start == '\'')
+		long_parameter = 1;
+	start++;
+	
+	// Find the start of the next string.
+	while (long_parameter || *start != ' ') {
+		// is this a parameter that is surrounded by apostrophe?
+		if (*start == '\'')
+			long_parameter = !long_parameter;
+		
+		// have we reached the end of the string?
+		if (*start == 0x00)
+			return NULL;
+			
+		// increment index
+		start++;
+	}
+	
+	// move pointer behind the spaces
+	while (*start == ' ')
+		start++;
+		
+	// if this is a parameter with an apostrophe, skip the apostrophe
+	if (*start == '\'')
+		start++;
+			
+	// return the found parameter
+	return start;
+}
+
+// Get the parameter length.
+static int cli_get_parameter_len(char *start) {
+	uint8_t long_parameter = 0;
+	int len = 0;
+	
+	// check if the data before the current pointer is an apstrophe
+	start--;
+	if (*start == '\'')
+		// this parameter is a long parameter
+		long_parameter = 1;
+	start++;
+	
+	// Find the next space or end of string
+	while (long_parameter || (*start != ' ' && *start != 0)) {
+		// is this a parameter that is surrounded by apostrophe?
+		if (*start == '\'')
+			long_parameter = !long_parameter;
+		
+		// increment index
+		start++;
+		len++;
+	}
+	
+	// check if the data before the current pointer is an apstrophe
+	start--;
+	if (*start == '\'')
+		// decrement length
+		len--;
+	start++;
+	
+	// return the found length
+	return len;
+}
+
 // get parameter function
 char *cli_get_parameter(char *command_string, int wanted_parameter, int *parameter_str_len) {
 	// create variables
 	int parameters_found = 0;
 	char *return_str = NULL;
+	
+	// clear the string length
 	*parameter_str_len = 0;
+	
+	// loop until the found parameter is the same as the wanted parameter
+	while (1) {
+		// Find the start of the next string. If this is the first loop,
+		// the command will be skipped and the first parameter is found.
+		command_string = cli_find_next_parameter(command_string);
+		
+		// is it valid?
+		if (command_string == NULL)
+			return NULL;
+			
+		// increment the found index
+		parameters_found++;
 
-	while (parameters_found < wanted_parameter) {
-		// Index the character pointer past the current word.  If this is the start
-		// of the command string then the first word is the command itself.
-		while (((*command_string) != 0x00) && ((*command_string) != ' ')) {
-			command_string++;
-		}
+		// Is this the start of the required parameter?
+		if (parameters_found == wanted_parameter) {
+			// How long is the parameter?
+			return_str = command_string;
+			
+			// get the length of this parameter
+			*parameter_str_len = cli_get_parameter_len(command_string);
 
-		// Find the start of the next string.
-		while (((*command_string) != 0x00) && ((*command_string) == ' ')) {
-			command_string++;
-		}
-
-		// Was a string found?
-		if (*command_string != 0x00) {
-			// Is this the start of the required parameter?
-			parameters_found++;
-
-			if (parameters_found == wanted_parameter) {
-				// How long is the parameter?
-				return_str = command_string;
-				while (((*command_string) != 0x00) && ((*command_string) != ' ')) {
-					(*parameter_str_len)++;
-					command_string++;
-				}
-
-				// set string length to zero
-				if (*parameter_str_len == 0) {
-					return_str = NULL;
-				}
-
-				break;
-			}
-		}
-		else {
+			// set string length to zero
+			if (*parameter_str_len == 0)
+				return_str = NULL;
+				
+			// done
 			break;
 		}
 	}
 
+	// return the string pointer
 	return return_str;
+}
+
+// get parameter function
+int cli_get_parameter_buf(char *command_string, int wanted_parameter, char *buf, int buf_len) {
+	// create variables
+	int parameters_found = 0;
+	int parameter_str_len = 0;
+	int ret = 0;
+	
+	// loop until the found parameter is the same as the wanted parameter
+	while (1) {
+		// Find the start of the next string. If this is the first loop,
+		// the command will be skipped and the first parameter is found.
+		command_string = cli_find_next_parameter(command_string);
+		
+		// is it valid?
+		if (command_string == NULL)
+			return -1;
+			
+		// increment the found index
+		parameters_found++;
+
+		// Is this the start of the required parameter?
+		if (parameters_found == wanted_parameter) {			
+			// get the length of this parameter
+			parameter_str_len = cli_get_parameter_len(command_string);
+
+			// set string length to zero
+			if (parameter_str_len == 0)
+				ret = -1;
+			else if (parameter_str_len > buf_len)
+				ret = -1;
+			else
+				memcpy(buf, command_string, parameter_str_len);
+			
+			// done
+			break;
+		}
+	}
+
+	// return the string pointer
+	return ret;
 }
 
 // help command
