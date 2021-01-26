@@ -279,7 +279,7 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   /* USER CODE BEGIN 6 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
-  memset(&cli_buf, 0, 128);
+  memset(&cli_buf, 0, 24);
   memcpy(&cli_buf, Buf, *Len);
   packet_ready = 1;
   return (USBD_OK);

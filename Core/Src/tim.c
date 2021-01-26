@@ -21,9 +21,10 @@
 #include "tim.h"
 
 /* USER CODE BEGIN 0 */
-#define samples 200
-uint32_t aCC_Strobe_Buffer[2] = {20, 0};
+#define samples 240
 uint32_t aCC_Landing_Buffer1[samples] = {
+		20,20,20,20,20,20,20,20,20,20,
+		20,20,20,20,20,20,20,20,20,20,
 		20,20,20,20,20,20,20,20,20,20,
 		25,25,25,25,25,25,25,25,25,25,
 		30,30,30,30,30,30,30,30,30,30,
@@ -43,6 +44,8 @@ uint32_t aCC_Landing_Buffer1[samples] = {
 		35,35,35,35,35,35,35,35,35,35,
 		30,30,30,30,30,30,30,30,30,30,
 		25,25,25,25,25,25,25,25,25,25,
+		20,20,20,20,20,20,20,20,20,20,
+		20,20,20,20,20,20,20,20,20,20,
 		20,20,20,20,20,20,20,20,20,20,
 };
 
@@ -56,6 +59,10 @@ uint32_t aCC_Landing_Buffer2[samples] = {
 		35,35,35,35,35,35,35,35,35,35,
 		30,30,30,30,30,30,30,30,30,30,
 		25,25,25,25,25,25,25,25,25,25,
+		20,20,20,20,20,20,20,20,20,20,
+		20,20,20,20,20,20,20,20,20,20,
+		20,20,20,20,20,20,20,20,20,20,
+		20,20,20,20,20,20,20,20,20,20,
 		20,20,20,20,20,20,20,20,20,20,
 		20,20,20,20,20,20,20,20,20,20,
 		25,25,25,25,25,25,25,25,25,25,
@@ -136,7 +143,7 @@ void MX_TIM4_Init(void)
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
   /* Landing lights intensity */
-  sConfigOC.Pulse = 100;
+  sConfigOC.Pulse = 5;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
@@ -158,8 +165,7 @@ void MX_TIM4_Init(void)
   }
   HAL_TIM_MspPostInit(&htim4);
 
-  HAL_TIM_PWM_Start_DMA(&htim4, TIM_CHANNEL_1, aCC_Landing_Buffer1, samples);
-  HAL_TIM_PWM_Start_DMA(&htim4, TIM_CHANNEL_2, aCC_Landing_Buffer2, samples);
+
 }
 
 void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* tim_pwmHandle)

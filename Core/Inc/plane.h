@@ -45,6 +45,11 @@ typedef struct {
 
 extern planeType_t myplane;
 extern uint8_t UserRxBufferFS[APP_RX_DATA_SIZE];
+extern uint8_t UserTxBufferFS[APP_TX_DATA_SIZE];
+
+#define samples 240
+extern uint32_t aCC_Landing_Buffer1[samples];
+extern uint32_t aCC_Landing_Buffer2[samples];
 
 void planeStart(void);
 void CDCprintf(const char *fmt, ...);

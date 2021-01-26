@@ -93,8 +93,8 @@ extern USBD_CDC_ItfTypeDef USBD_Interface_fops_FS;
 /* USER CODE BEGIN EXPORTED_VARIABLES */
 /* Define size for the receive and transmit buffer over CDC */
 /* It's up to user to redefine and/or remove those define */
-#define APP_RX_DATA_SIZE  100
-#define APP_TX_DATA_SIZE  100
+#define APP_RX_DATA_SIZE  200
+#define APP_TX_DATA_SIZE  200
 
 /* USER CODE END EXPORTED_VARIABLES */
 

@@ -12,28 +12,27 @@ planeType_t myplane;
 static void strb(void);
 static void restoreState(void);
 
-uint8_t cli_buf[128];
+uint8_t cli_buf[24];
 uint8_t packet_ready = 0;
 
 void planeStart(void) {
 
 	HAL_Delay(1000);
-	CDC_Transmit_FS((uint8_t *)"Starting application...\r\n", 26);
+	CDC_Transmit_FS((uint8_t*) "Starting application...\r\n", 26);
 	restoreState();
 	myplane.brand = boeing;
 
-	while(1){
-		if(packet_ready == 0){
+	while (1) {
+		if (packet_ready == 0) {
 			strb();
-		}else{
-			cli_process_command((char *)UserRxBufferFS);
+		} else {
+			cli_process_command((char*) cli_buf);
 			packet_ready = 0;
 		}
-
 	}
 }
 
-static void restoreState(void){
+static void restoreState(void) {
 	/*
 	 * ToDo: Get the default state from flash
 	 */
@@ -45,52 +44,52 @@ static void restoreState(void){
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
 }
 
-static void strb(void){
-	if(myplane.brand == boeing){
-		htim3.Instance->CCR1=100;
-		htim3.Instance->CCR2=0;
-		HAL_Delay(50);
-		htim3.Instance->CCR1=0;
+static void strb(void) {
+	if (myplane.brand == boeing) {
+		htim3.Instance->CCR1 = 100;
+		htim3.Instance->CCR2 = 0;
+		HAL_Delay(100);
+		htim3.Instance->CCR1 = 0;
 		HAL_Delay(450);
-		htim3.Instance->CCR2=100;
-		HAL_Delay(50);
-		htim3.Instance->CCR2=0;
+		htim3.Instance->CCR2 = 100;
+		HAL_Delay(100);
+		htim3.Instance->CCR2 = 0;
 		HAL_Delay(450);
-		htim3.Instance->CCR1=100;
+		htim3.Instance->CCR1 = 100;
+		HAL_Delay(100);
+		htim3.Instance->CCR2 = 0;
+		htim3.Instance->CCR1 = 0;
+	} else if (myplane.brand == airbus) {
+		htim3.Instance->CCR1 = 100;
+		htim3.Instance->CCR2 = 0;
 		HAL_Delay(50);
-		htim3.Instance->CCR2=0;
-		htim3.Instance->CCR1=0;
-		} else if(myplane.brand == airbus){
-			htim3.Instance->CCR1=100;
-			htim3.Instance->CCR2=0;
-			HAL_Delay(50);
-			htim3.Instance->CCR1=0;
-			HAL_Delay(50);
-			htim3.Instance->CCR1=100;
-			HAL_Delay(50);
-			htim3.Instance->CCR1=0;
-			HAL_Delay(350);
-			htim3.Instance->CCR2=100;
-			HAL_Delay(50);
-			htim3.Instance->CCR2=0;
-			HAL_Delay(450);
-			htim3.Instance->CCR1=100;
-			HAL_Delay(50);
-			htim3.Instance->CCR2=0;
-			htim3.Instance->CCR1=0;
-		}
+		htim3.Instance->CCR1 = 0;
+		HAL_Delay(50);
+		htim3.Instance->CCR1 = 100;
+		HAL_Delay(50);
+		htim3.Instance->CCR1 = 0;
+		HAL_Delay(350);
+		htim3.Instance->CCR2 = 100;
+		HAL_Delay(50);
+		htim3.Instance->CCR2 = 0;
+		HAL_Delay(450);
+		htim3.Instance->CCR1 = 100;
+		HAL_Delay(50);
+		htim3.Instance->CCR2 = 0;
+		htim3.Instance->CCR1 = 0;
+	}
 }
 
 void CDCprintf(const char *fmt, ...) {
-  va_list argp;
-  va_start(argp, fmt);
-  printf_valist(fmt, argp);
-  va_end(argp);
+	va_list argp;
+	va_start(argp, fmt);
+	printf_valist(fmt, argp);
+	va_end(argp);
 }
 
 void printf_valist(const char *fmt, va_list argp) {
-  char string[APP_TX_DATA_SIZE];
+	char string[APP_TX_DATA_SIZE];
 
-  if (vsprintf(string, fmt, argp) > 0) //{
-	  CDC_Transmit_FS((uint8_t*)string, strlen((const char*)string));
+	if (vsprintf(string, fmt, argp) > 0) //{
+		CDC_Transmit_FS((uint8_t*) string, strlen((const char*) string));
 }
